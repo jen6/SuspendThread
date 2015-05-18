@@ -1,6 +1,7 @@
 #pragma once
 #include <thread>
 #include <future>
+#include <iostream>
 
 class SuspendThread {
 private:
@@ -16,6 +17,19 @@ public:
 		{
 			fut.wait();
 			func();
+		});
+		task.swap(it);
+	}
+
+	template<typename FN_, typename ... Arguments>
+	SuspendThread(FN_ func, Arguments&& ... args)
+	{
+		auto fut_suspend = Psuspend.get_future();
+		std::thread it(
+			[fut = std::move(fut_suspend), func, args ...]()
+		{
+			fut.wait();
+			func(std::forward<Arguments>(args)...);
 		});
 		task.swap(it);
 	}
