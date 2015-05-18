@@ -9,7 +9,7 @@ private:
 	std::promise<void> Psuspend;
 public:
 	template<typename FN_>
-	SuspendThread(FN_&& func)
+	SuspendThread(FN_ func)
 	{
 		auto fut_suspend = Psuspend.get_future();
 		std::thread it(
