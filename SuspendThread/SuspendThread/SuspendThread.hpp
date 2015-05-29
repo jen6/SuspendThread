@@ -1,36 +1,32 @@
 #pragma once
 #include <thread>
 #include <future>
-#include <iostream>
+#include <functional>
+
+
 
 class SuspendThread {
+
 private:
+	
 	std::thread task;
 	std::promise<void> Psuspend;
 public:
-	template<typename FN_>
-	SuspendThread(FN_ func)
-	{
-		auto fut_suspend = Psuspend.get_future();
-		std::thread it(
-			[fut = std::move(fut_suspend), func]()
-		{
-			fut.wait();
-			func();
-		});
-		task.swap(it);
-	}
 
 	template<typename FN_, typename ... Arguments>
 	SuspendThread(FN_ func, Arguments&& ... args)
 	{
-		auto fut_suspend = Psuspend.get_future();
-		std::thread it(
-			[fut = std::move(fut_suspend), func, args ...]()
+		using function_bind = typename std::function<void()>;
+		function_bind bFunc = std::bind(func, std::forward<Arguments>(args)...);
+
+		auto l = [this](function_bind fc) 
 		{
+			auto fut = this->Psuspend.get_future();
 			fut.wait();
-			func(std::forward<Arguments>(args)...);
-		});
+			fc();
+		};
+
+		std::thread it(l, std::move(bFunc));
 		task.swap(it);
 	}
 
@@ -38,6 +34,7 @@ public:
 	{
 		task.join();
 	}
+		
 	void run() noexcept
 	{
 		Psuspend.set_value();
