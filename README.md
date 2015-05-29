@@ -21,5 +21,9 @@ int main()
   //make thread suspended state
   t.run(); 
   //now it run
+  
+  SuspendThread t1([](int a){std::cout << a << std::endl;}, 3);
+  //use argvs
+  t1.run()
 }
 ```
