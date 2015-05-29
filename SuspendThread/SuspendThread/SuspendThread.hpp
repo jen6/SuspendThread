@@ -3,8 +3,6 @@
 #include <future>
 #include <functional>
 
-
-
 class SuspendThread {
 
 private:
